@@ -5,9 +5,15 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -55,9 +61,13 @@ public class MyCrawler extends WebCrawler {
             System.out.println("Number of outgoing links: " + links.size());
 
             try {
-                FileUtils.write(new File("D:/tmp/data/crawl/data/" + new Date().getTime() + ".txt"),
-                        text.replace('\n', ' '));
-            } catch (IOException ex) {
+                Configuration config = new Configuration();
+                FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.51.116:8020/"), config);
+                FSDataOutputStream outStream = fileSystem.append(new Path("/user/admin/crawler-results.txt"));
+
+                IOUtils.write(text.replace('\n', ' '), outStream);
+                IOUtils.closeQuietly(outStream);
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
