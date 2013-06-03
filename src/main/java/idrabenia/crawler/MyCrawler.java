@@ -62,12 +62,15 @@ public class MyCrawler extends WebCrawler {
 
             try {
                 Configuration config = new Configuration();
-                FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.51.116:8020/"), config);
+                System.setProperty("HADOOP_USER_NAME", "admin");
+                FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.51.116:8022/"), config);
                 FSDataOutputStream outStream = fileSystem.append(new Path("/user/admin/crawler-results.txt"));
 
                 IOUtils.write(text.replace('\n', ' '), outStream);
+                outStream.flush();
                 IOUtils.closeQuietly(outStream);
             } catch (Exception ex) {
+                ex.printStackTrace();
                 throw new RuntimeException(ex);
             }
         }
